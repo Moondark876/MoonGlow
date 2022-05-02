@@ -42,7 +42,7 @@ h1, h2, h3 {
 #nav ul {
     list-style-type: none;
     padding: 0px;
-    outline 5px black;
+    outline 5px solid black;
 }
 
 #main {
