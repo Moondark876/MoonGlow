@@ -49,6 +49,7 @@ h1, h2, h3 {
     width: 600px;
     float: right;
     padding: 20px;
+    margin-left:  100px;
 }
 
 #footer {
