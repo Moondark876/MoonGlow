@@ -1,0 +1,2 @@
+✓: done, ✗: undone
+website favicon: ✓
