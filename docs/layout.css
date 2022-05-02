@@ -26,7 +26,7 @@ h1, h2, h3 {
 }
 
 #content {
-    padding: 20px;
+    padding: 10px;
 }
 
 #nav {
@@ -48,6 +48,7 @@ h1, h2, h3 {
 #main {
     width: 600px;
     float: right;
+    padding: 20px;
 }
 
 #footer {
