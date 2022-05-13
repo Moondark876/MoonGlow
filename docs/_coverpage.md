@@ -1,4 +1,4 @@
-# [Moonshine](README.md)
+# [Moonshine](Moondark876.github.io/MoonShine/#/)
 
 > Moonshine is work-in-progress, open-source, dynamic programming language written in c++.
 
