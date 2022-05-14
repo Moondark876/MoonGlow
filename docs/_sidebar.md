@@ -1,3 +1,4 @@
 - Overview
 
-- [Home](./index.html)
+  - [Home](./index.html)
+  - [Syntax](syntax.md)
