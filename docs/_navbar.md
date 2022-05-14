@@ -1,2 +1,2 @@
 * Overview
-    * [Home](index.html)
+    * [Home](https://Moondark876.github.io/MoonShine/#/)
