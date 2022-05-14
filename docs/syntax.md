@@ -1,6 +1,6 @@
 # Syntax (Concept)
 
-> Basic Operators
+> **Basic Operators**
 
 - *Subtraction Operator*: `-`
 - *Addition Operator*: `+`
