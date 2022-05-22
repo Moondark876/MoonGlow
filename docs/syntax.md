@@ -12,4 +12,5 @@
 
 **Sample Source Code**
 
-``` length = 98 - 23```
+``` length = 98 - 23
+output(length)```
