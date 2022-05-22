@@ -1,2 +1,2 @@
-* ✓: done, ✗: undone
-  * website favicon: ✓
+**✓: done, ✗: undone**
+  - [x] website favicon: ✓
