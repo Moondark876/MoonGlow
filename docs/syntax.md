@@ -6,13 +6,11 @@
 - *Addition Operator*: `+`
 - *Multiplication Operator*: `*`
 - *Float Division Operator*: `/`
-- *Integer Division Operator*: `//`
-- *Modulus Operator*: `%`
 - *Assignment Operator*: `=`
 
 **Sample Source Code**
 
 ```
-length = 98 - 23
-output(length)
+length = 98 - 23;
+out length
 ```
