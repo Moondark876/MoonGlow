@@ -14,5 +14,5 @@
 var length = 98 - 23;
 out length;
 
->>> <script>98-23</script>
+>>> 75
 ```
