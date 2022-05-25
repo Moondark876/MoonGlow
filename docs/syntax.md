@@ -11,6 +11,6 @@
 **Sample Source Code**
 
 ```
-length = 98 - 23;
+var length = 98 - 23;
 out length
 ```
