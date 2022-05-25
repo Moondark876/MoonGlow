@@ -12,5 +12,5 @@
 
 ```
 var length = 98 - 23;
-out length
+out length;
 ```
