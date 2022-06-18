@@ -2,4 +2,4 @@
 
 # Not Here Yet!
 
-![MoonGlow's Logo](docs/assets/favicon.ico)
+![MoonGlow's Logo](assets/favicon.ico)
