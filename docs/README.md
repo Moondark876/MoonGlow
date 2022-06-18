@@ -1,4 +1,4 @@
 <!-- README.md -->
 
 # Not Here Yet!
-![MoonGlow Logo](Assets/favicon.ico)
+![MoonGlow's Logo](Assets/favicon.ico)
