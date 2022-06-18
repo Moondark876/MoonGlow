@@ -1,4 +1,4 @@
 <!-- variable.md -->
 
 # Nothing to see here
-![MoonGlow Logo](Assets/favicon.ico)
+![MoonGlow Logo](docs/assets/favicon.ico)
