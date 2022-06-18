@@ -1,3 +1,4 @@
-# Not Implemented
+<!-- README.md -->
 
-### **YOU HAVE FOUND AN EASTER EGG!1!1**
+# Not Here Yet!
+[MoonGlow Logo](Assets/favicon.ico)

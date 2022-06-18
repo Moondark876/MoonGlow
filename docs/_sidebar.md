@@ -1,3 +1,9 @@
-- **Basic Language Features**
+<!-- _sidebar.md -->
 
-  - [*Syntax*](syntax.md)
+- [**Home**](README.md)
+
+- Syntax
+
+  - [Tokens](Syntax/tokens.md)
+  - [Variables](Syntax/variables.md)
+

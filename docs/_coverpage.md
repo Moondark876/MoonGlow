@@ -1,3 +1,5 @@
+<!-- _coverpage.md -->
+
 # [MoonGlow](README.md)
 
 > MoonGlow is work-in-progress, open-source, dynamic programming language written in c.
