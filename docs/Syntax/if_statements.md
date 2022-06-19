@@ -7,3 +7,17 @@ If statements in MoonGlow can be defined in 1 line, or in multiple depending on 
 ```MoonGlow
 if (true) -> out "yes";
 ```
+
+The above in expanded format would be:
+
+```MoonGlow
+if (true) -> {
+    out "yes";
+}
+```
+
+If statements in MoonGlow support `and` and `or` operators. An example of their usage is below:
+
+```MoonGlow
+-- Not implemented yet
+```
