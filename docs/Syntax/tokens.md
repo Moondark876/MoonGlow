@@ -1,8 +1,5 @@
 <!-- tokens.md -->
 
-<script src="../src/codeblocks.js">
-</script>
-
 # MoonGlow's Tokens
 
 MoonGlow, at the moment, has 35 tokens in total.

@@ -1,8 +1,17 @@
 <!-- variable.md -->
 
-<script src="../src/codeblocks.js">
+<head>
+<style>
+    .code-str { color:#090; }
+    .code-elem{ color: #F90; }
+    .code-comment { color:#999; }
+    .code-keyword { color: #00F; }
+</style>
+<script src="../scripts/codeblocks.js">
 </script>
+</head>
 
+<body>
 # Variables in MoonGlow
 
 Variables in MoonGlow are defined dynamically. This means that the variable's typing is subject to change. Variables in MoonGlow are defined with the `var` keyword. See example below:
@@ -27,3 +36,4 @@ shine = shine + "glow";
 var moon = 5;
 moon = moon + 5;
 ```
+</body>
