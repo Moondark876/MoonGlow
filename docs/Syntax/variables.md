@@ -1,5 +1,8 @@
 <!-- variable.md -->
 
+<script src="../src/codeblocks.js">
+</script>
+
 # Variables in MoonGlow
 
 Variables in MoonGlow are defined dynamically. This means that the variable's typing is subject to change. Variables in MoonGlow are defined with the `var` keyword. See example below:
