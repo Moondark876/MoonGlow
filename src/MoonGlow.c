@@ -6,9 +6,11 @@
 #include "vm.h"
 
 static void repl() {
+  printf("This is MoonGlow v1.0.0.\nRun your code in the terminal window.\n");
+
   char line[1024];
   for (;;) {
-    printf("> ");
+    printf(">>> "); 
 
     if (!fgets(line, sizeof(line), stdin)) {
       printf("\n");
