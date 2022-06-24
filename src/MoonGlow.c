@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "common.h"
 #include "chunk.h"
 #include "debug.h"
@@ -22,6 +23,7 @@ static void repl() {
 }
 
 static char* readFile(const char* path) {
+
   FILE* file = fopen(path, "rb");
 
   if (file == NULL) {
@@ -67,7 +69,12 @@ int main(int argc, const char* argv[]) {
   if (argc == 1) {
     repl();
   } else if (argc == 2) {
-    runFile(argv[1]);
+    if (strrchr(argv[1], '.') == ".glow" ) {
+      printf("MoonGlow: %s is not a valid file.\n", argv[1]);
+      exit(1);
+    } else {
+      runFile(argv[1]);
+    }
   } else {
     fprintf(stderr, "Usage: MoonGlow [path]\n");
     exit(64);
