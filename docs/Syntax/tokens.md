@@ -5,7 +5,7 @@
 MoonGlow, at the moment, has 35 tokens in total.
 They are:
 
-```MoonGlow
+```js
 Left Parenthesis = '('
 Right Parenthesis = ')'
 Left Brace = '{'

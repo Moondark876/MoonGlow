@@ -1,3 +1,5 @@
+<!-- escape_characters.md -->
+
 # Escape Characters in MoonGlow
 
 > [!TIP] 
@@ -7,8 +9,10 @@ Escape characters in MoonGlow would be an excellent addition. It would help user
 
 Below are some examples of those of which I plan on implementing:
 
-```
+```MoonGlow
 newline = '\n'
 tab = '\t'
 backspace = '\b'
 ```
+
+> [!TIP]

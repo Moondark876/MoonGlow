@@ -46,5 +46,34 @@
   <script src="//unpkg.com/docsify-material-icons/dist/docsify-material-icons.min.js"></script>
   <!-- JQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- Syntax Highlighting -->
+  <script>
+  Prism.languages.MoonGlow = {
+    string: {
+        pattern: /"(?:\\.|[^\\"\r\n])*"(?!\s*:)/,
+        lookbehind: true,
+        greedy: true
+    },
+
+    comment: {
+		    pattern: /--.*|-\/[\S\s]*?(?:\/-|$)/,
+        greedy: true
+    },
+
+    number: {
+        pattern: /-?\d+\.?\d*(?:e[+-]?\d+)?/i,
+        greedy: true
+    },
+
+    keyword: /\b(return|if|else|out|func|var|and|or|for|while)\b/,
+
+    boolean: /\b(?:false|true)\b/,
+    
+    none: {
+      pattern: /\bnone\b/,
+      alias: 'keyword'
+    }
+  };  
+  </script>
 </body>
 </html>

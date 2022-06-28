@@ -2,20 +2,21 @@
 
 # For loops in MoonGlow
 
-For loops in MoonGlow are the same as regular c-style for loops, with the same syntax, but with added arrows for style. See example below:
+In this section, we will learn how to use for loops in MoonGlow.
+MoonGlow has a for loop, which is a loop that executes a block of code a number of times. The variable declared in the scope of the declaration is also terminated upon the termination of the for loop. The for loop is written like this:
 
-```
-for (var i = 1; i == 10; i = i + 2) -> {
-    -- body here
+```MoonGlow
+for (var i = 0; i < 10; i = i + 1) ->{
+    -- Code to execute 10 times
 }
 ```
 
-The variable declared in the scope of the declaration is also terminated upon the termination of the for loop. The three fields can also optionally be left unfilled, to initiate a while loop-like sequence:
+For loops in MoonGlow are very similar to the for loops in C/C++. The only difference is that MoonGlow uses the `(-/condition/-) ->` syntax instead of the `(-/condition/-)` syntax in those languages.
 
-```
+A for loop can be used in the same way as a while loop in MoonGlow. To achieve this effect, leave all of the `(condition)` syntaxes empty. See example below:
+
+```MoonGlow
 for (;;) -> {
-    -- body here
+    -- Code to execute infinitely
 }
-```
-
-There is virtually no difference between using the latter and using a while loop. 
+``` 
