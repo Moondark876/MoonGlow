@@ -1,5 +1,6 @@
 <!-- README.md -->
 
+<!-- Upsidedly's Code, all credits to him -->
 <style> @keyframes shifting { 0% { transform: translateX(0%); } 50% { transform: translateX(45%); } 120% { transform: translateX(10%); } } @keyframes hover { 0% { transform: translateY(0em); } 50% { transform: translateY(0.5em); } 100% { transform: translateY(0em); } } .vroom { animation: shifting 4s ease-in-out infinite; } </style>
 
 # MoonGlow
