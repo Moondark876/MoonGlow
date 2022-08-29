@@ -6,6 +6,8 @@
 #include "common.h"
 #include "compiler.h"
 #include "scanner.h"
+#include "memory.h"
+
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
 #endif
@@ -43,10 +45,18 @@ typedef struct {
 typedef struct {
   Token name;
   int depth;
+  bool isCaptured;
 } Local;
+
+typedef struct {
+  uint8_t index;
+  bool isLocal;
+} Upvalue;
 
 typedef enum {
   TYPE_FUNCTION,
+  TYPE_INITIALIZER,
+  TYPE_METHOD,
   TYPE_SCRIPT
 } FunctionType;
 
@@ -56,11 +66,17 @@ typedef struct Compiler {
   FunctionType type;
   Local locals[UINT8_COUNT];
   int localCount;
+  Upvalue upvalues[UINT8_COUNT];
   int scopeDepth;
 } Compiler;
 
+typedef struct ClassCompiler {
+  struct ClassCompiler* enclosing;
+} ClassCompiler;
+
 Parser parser;
 Compiler* current = NULL;
+ClassCompiler* currentClass = NULL;
 
 static Chunk* currentChunk() {
   return &current->function->chunk;
@@ -148,7 +164,12 @@ static int emitJump(uint8_t instruction) {
 }
 
 static void emitReturn() {
-    emitBytes(OP_NONE, OP_RETURN);
+  if (current->type == TYPE_INITIALIZER) {
+    emitBytes(OP_GET_LOCAL, 0);
+  } else {
+    emitByte(OP_NONE);
+  }
+  emitByte(OP_RETURN);
 }
 
 static uint8_t makeConstant(Value value) {
@@ -191,8 +212,14 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
   }
   Local* local = &current->locals[current->localCount++];
   local->depth = 0;
-  local->name.start = "";
-  local->name.length = 0;
+  local->isCaptured = false;
+   if (type != TYPE_FUNCTION) {
+    local->name.start = "self";
+    local->name.length = 4;
+  } else {
+    local->name.start = "";
+    local->name.length = 0;
+  }
 }
 
 static ObjFunction* endCompiler() {
@@ -217,7 +244,11 @@ static void beginScope() {
 static void endScope() {
   current->scopeDepth--;
   while (current->localCount > 0 && current->locals[current->localCount - 1].depth > current->scopeDepth) {
-    emitByte(OP_POP);
+    if (current->locals[current->localCount - 1].isCaptured) {
+      emitByte(OP_CLOSE_UPVALUE);
+    } else {
+      emitByte(OP_POP);
+    }
     current->localCount--;
   }
 }
@@ -251,6 +282,42 @@ static int resolveLocal(Compiler* compiler, Token* name) {
   return -1;
 }
 
+static int addUpvalue(Compiler* compiler, uint8_t index,
+                      bool isLocal) {
+  int upvalueCount = compiler->function->upvalueCount;
+
+  for (int i = 0; i < upvalueCount; i++) {
+    Upvalue* upvalue = &compiler->upvalues[i];
+    if (upvalue->index == index && upvalue->isLocal == isLocal) {
+      return i;
+    }
+  }
+
+  if (upvalueCount == UINT8_COUNT) {
+    error("Too many closure variables in function.");
+    return 0;
+  }
+
+  compiler->upvalues[upvalueCount].isLocal = isLocal;
+  compiler->upvalues[upvalueCount].index = index;
+  return compiler->function->upvalueCount++;
+}
+
+static int resolveUpvalue(Compiler* compiler, Token* name) {
+  if (compiler->enclosing == NULL) return -1;
+
+  int local = resolveLocal(compiler->enclosing, name);
+  if (local != -1) {
+    compiler->enclosing->locals[local].isCaptured = true;
+    return addUpvalue(compiler, (uint8_t)local, true);
+  }
+  int upvalue = resolveUpvalue(compiler->enclosing, name);
+  if (upvalue != -1) {
+    return addUpvalue(compiler, (uint8_t)upvalue, false);
+  }
+  return -1;
+}
+
 static void addLocal(Token name) {
   if (current->localCount == UINT8_COUNT) {
     error("Too many local variables in function.");
@@ -260,6 +327,7 @@ static void addLocal(Token name) {
   Local* local = &current->locals[current->localCount++];
   local->name = name;
   local->depth = -1;
+  local->isCaptured = false;
 }
 
 static void declareVariable() {
@@ -352,6 +420,22 @@ static void call(bool canAssign) {
   emitBytes(OP_CALL, argCount);
 }
 
+static void dot(bool canAssign) {
+  consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
+  uint8_t name = identifierConstant(&parser.previous);
+
+  if (canAssign && match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_PROPERTY, name);
+  } else if (match(TOKEN_LEFT_PAREN)) {
+    uint8_t argCount = argumentList();
+    emitBytes(OP_INVOKE, name);
+    emitByte(argCount);
+  } else {
+    emitBytes(OP_GET_PROPERTY, name);
+  }
+}
+
 static void literal(bool canAssign) {
   switch (parser.previous.type) {
     case TOKEN_FALSE: emitByte(OP_FALSE); break;
@@ -392,6 +476,9 @@ static void namedVariable(Token name, bool canAssign) {
   if (arg != -1) {
     getOp = OP_GET_LOCAL;
     setOp = OP_SET_LOCAL;
+  } else if ((arg = resolveUpvalue(current, &name)) != -1) {
+    getOp = OP_GET_UPVALUE;
+    setOp = OP_SET_UPVALUE;
   } else {
     arg = identifierConstant(&name);
     getOp = OP_GET_GLOBAL;
@@ -409,6 +496,15 @@ static void namedVariable(Token name, bool canAssign) {
 static void variable(bool canAssign) {
   namedVariable(parser.previous, canAssign);
 }
+
+static void self(bool canAssign) {
+  if (currentClass == NULL) {
+    error("Can't use 'self' outside of a class.");
+    return;
+  }
+
+  variable(false);
+} 
 
 static void unary(bool canAssign) {
   TokenType operatorType = parser.previous.type;
@@ -430,7 +526,7 @@ ParseRule rules[] = {
     [TOKEN_LEFT_BRACE] = {NULL,     NULL,   PREC_NONE}, 
     [TOKEN_RIGHT_BRACE] = {NULL,     NULL,   PREC_NONE},
     [TOKEN_COMMA] = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_DOT] = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_DOT] = {NULL,     dot,    PREC_CALL},
     [TOKEN_MINUS] = {unary,    binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL,     binary, PREC_TERM},
     [TOKEN_POINT] = {NULL,   NULL, PREC_NONE},
@@ -460,7 +556,7 @@ ParseRule rules[] = {
     [TOKEN_PRINT] = {NULL,     NULL,   PREC_NONE},
     [TOKEN_RETURN] = {NULL,     NULL,   PREC_NONE},
     [TOKEN_SUPER] = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_SELF] = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_SELF] = {self,     NULL,   PREC_NONE},
     [TOKEN_TRUE] = {literal,     NULL,   PREC_NONE},
     [TOKEN_VAR] = {NULL,     NULL,   PREC_NONE},
     [TOKEN_WHILE] = {NULL,     NULL,   PREC_NONE},
@@ -594,6 +690,9 @@ static void returnStatement() {
   if (match(TOKEN_SEMICOLON)) {
     emitReturn();
   } else {
+    if (current->type == TYPE_INITIALIZER) {
+      error("Can't return a value from an initializer.");
+    }
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' after return value.");
     emitByte(OP_RETURN);
@@ -645,7 +744,51 @@ static void function(FunctionType type) {
   block();
 
   ObjFunction* function = endCompiler();
-  emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
+  emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
+  for (int i = 0; i < function->upvalueCount; i++) {
+    emitByte(compiler.upvalues[i].isLocal ? 1 : 0);
+    emitByte(compiler.upvalues[i].index);
+  }
+}
+
+static void method() {
+  consume(TOKEN_IDENTIFIER, "Expect method name.");
+  uint8_t constant = identifierConstant(&parser.previous);
+  FunctionType type = TYPE_METHOD;
+  if (parser.previous.length == 4 &&
+      memcmp(parser.previous.start, "init", 4) == 0) {
+    type = TYPE_INITIALIZER;
+  }
+  function(type);
+  emitBytes(OP_METHOD, constant);
+}
+
+static void classDeclaration() {
+  consume(TOKEN_IDENTIFIER, "Expect class or superclass name. (Superclass if error at is \"->\").");
+  /* if (!check(TOKEN_LEFT_BRACE) && !check(TOKEN_EOF)) {
+    advance();
+    if (check(TOKEN_POINT))
+      advance();
+      consume(TOKEN_IDENTIFIER, "Expect class name.");
+  } */
+  Token className = parser.previous;
+  uint8_t nameConstant = identifierConstant(&parser.previous);
+  declareVariable();
+
+  emitBytes(OP_CLASS, nameConstant);
+  defineVariable(nameConstant);
+  ClassCompiler classCompiler;
+  classCompiler.enclosing = currentClass;
+  currentClass = &classCompiler;
+  namedVariable(className, false);
+
+  consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+  while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+    method();
+  }
+  consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+  emitByte(OP_POP);
+  currentClass = currentClass->enclosing;
 }
 
 static void funDeclaration() {
@@ -700,7 +843,9 @@ static void statement() {
 }
 
 static void declaration() {
-  if (match(TOKEN_FUNC)) {
+  if (match(TOKEN_CLASS)) {
+    classDeclaration();
+  } else if (match(TOKEN_FUNC)) {
     funDeclaration();
   } else if (match(TOKEN_VAR)) {
     varDeclaration();
@@ -724,4 +869,12 @@ ObjFunction* compile(const char* source) {
   }
   ObjFunction* function = endCompiler();
   return parser.hadError ? NULL : function;
+}
+
+void markCompilerRoots() {
+  Compiler* compiler = current;
+  while (compiler != NULL) {
+    markObject((Obj*)compiler->function);
+    compiler = compiler->enclosing;
+  }
 }
